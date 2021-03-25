@@ -19,6 +19,9 @@ import { loginRequestAction } from '../redux/actions/authActions'
 const Login = () => {
   const [emailValue, setEmailValue] = useState('')
   const [passwordValue, setPasswordValue] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const disabled = isLoading
 
   const dispatch = useDispatch()
 
@@ -35,6 +38,7 @@ const Login = () => {
     const password = passwordValue.trim()
 
     try {
+      setIsLoading(true)
       await createAsyncAction(dispatch, loginRequestAction({
         email,
         password,
@@ -43,8 +47,10 @@ const Login = () => {
       Toast.show({
         text: 'Login problem',
       })
+    } finally {
+      setIsLoading(false)
     }
-  }, [emailValue, passwordValue])
+  }, [emailValue, passwordValue, isLoading])
 
   return (
     <Container>
@@ -53,14 +59,14 @@ const Login = () => {
         <Form>
           <Item floatingLabel>
             <Label>Email</Label>
-            <Input value={emailValue} onChange={onEmailChange} />
+            <Input value={emailValue} onChange={onEmailChange} disabled={disabled} />
           </Item>
           <Item floatingLabel>
             <Label>Password</Label>
-            <Input value={passwordValue} onChange={onPasswordChange} />
+            <Input value={passwordValue} onChange={onPasswordChange} disabled={disabled} />
           </Item>
         </Form>
-        <Button full rounded style={{ marginTop: 32 }} onPress={onButtonPress}>
+        <Button full rounded style={{ marginTop: 32 }} onPress={onButtonPress} disabled={disabled}>
           <Text>
             Login
           </Text>
