@@ -11,7 +11,7 @@ import {
 } from '../redux/actions/toDoActions'
 import store from '../redux/store'
 
-export const ENDPOINT = 'http://api.todolist.local'
+export const ENDPOINT = '192.168.43.235:3001' //'http://api.todolist.local'
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>
 
