@@ -4,18 +4,29 @@
   ],
   "plugins": [
     "@typescript-eslint",
-    "react"
+    "react",
+    "only-warn"
   ],
   "parser": "@typescript-eslint/parser",
   "rules": {
+    "globals": {
+      "fetch": false
+    },
+    "import/extensions": 0,
     "import/no-unresolved": 0,
     "react/jsx-filename-extension": [
-      1,
+      0
+    ],
+    "@typescript-eslint/semi": 0,
+    "semi": [
+      2,
+      "never"
+    ],
+    "import/prefer-default-export": 0,
+    "import/no-cycle": [
+      2,
       {
-        "extensions": [
-          ".jsx",
-          ".tsx"
-        ]
+        "maxDepth": 2
       }
     ]
   }
