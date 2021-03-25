@@ -7,11 +7,11 @@
     "react",
     "only-warn"
   ],
+  "globals": {
+    "fetch": false
+  },
   "parser": "@typescript-eslint/parser",
   "rules": {
-    "globals": {
-      "fetch": false
-    },
     "import/extensions": 0,
     "import/no-unresolved": 0,
     "react/jsx-filename-extension": [

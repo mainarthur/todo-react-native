@@ -6,6 +6,7 @@ import { err } from '../logging/logger'
 import call from './call'
 import store from '../redux/store'
 import { setAccessTokenAction, setRefreshTokenAction } from '../redux/actions/tokenActions'
+import history from '../routing/history'
 
 export const refreshTokens = async (): Promise<boolean> => {
   try {

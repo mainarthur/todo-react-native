@@ -3,6 +3,7 @@ import {
   takeEvery,
   delay,
 } from 'redux-saga/effects'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { api } from '../../api/api'
 import AuthBody from '../../api/bodies/AuthBody'
@@ -31,8 +32,8 @@ function* authRequested(action: AsyncAction<{}, AuthBody>) {
       refresh_token: refreshToken,
     } = authResponse
 
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('refresh_token', refreshToken)
+    yield AsyncStorage.setItem('access_token', accessToken)
+    yield AsyncStorage.setItem('refresh_token', refreshToken)
 
     yield put(setAccessTokenAction(accessToken))
     yield put(setRefreshTokenAction(refreshToken))

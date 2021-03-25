@@ -27,8 +27,6 @@ import {
 import { ToDoAction } from '../constants'
 import AsyncAction from '../types/AsyncAction'
 import BoardPayload from '../types/payloads/BoardPayload'
-import { connectDB, getDatabaseName } from '../../indexeddb/connect'
-import Database from '../../indexeddb/Database'
 import BodyPayload from '../types/payloads/BodyPayload'
 import { getSocket } from '../../socket.io'
 import Action from '../types/Action'
@@ -51,53 +49,19 @@ function* requestTodos(action: AsyncAction<ToDo[], BoardPayload>) {
   const lastUpdateField = getLastUpdateFieldName(boardId)
 
   const todosResponse: ToDoListResponse = yield api<ToDoListResponse, {}>({
-    endpoint: `/todo?boardId=${boardId}${localStorage.getItem(lastUpdateField) ? `&from=${localStorage.getItem(lastUpdateField)}` : ''}`,
+    endpoint: `/todo?boardId=${boardId}`,
   })
 
   try {
     if (todosResponse.status) {
       const { results: loadedTodos } = todosResponse
-      const currentLastUpdate: number = parseInt(localStorage.getItem(lastUpdateField), 10)
-      let maxLastUpdate = 0
-      const db: Database = yield connectDB(getDatabaseName(user.id, boardId))
-
-      if (!Number.isNaN(currentLastUpdate)) {
-        maxLastUpdate = Math.max(currentLastUpdate, maxLastUpdate)
-      }
-
-      const promises: Promise<void>[] = []
-
-      for (let i = 0; i < loadedTodos.length; i += 1) {
-        const toDo = loadedTodos[i]
-
-        const { lastUpdate } = toDo
-
-        if (lastUpdate) {
-          maxLastUpdate = Math.max(maxLastUpdate, lastUpdate)
-        }
-
-        const store = db.getStore()
-
-        if (!toDo.deleted) {
-          promises.push(store.put(toDo))
-        } else {
-          promises.push(store.delete(toDo.id))
-        }
-      }
-
-      yield Promise.all(promises)
-
-      localStorage.setItem(lastUpdateField, `${maxLastUpdate}`)
-
-      const store = db.getStore()
-      const todosRequest: ToDo[] = yield store.getAll<ToDo>()
 
       yield put(setTodosAction({
         boardId,
-        todos: todosRequest.map((toDo) => ({ ...toDo, loadingPart: LoadingPart.NONE })),
+        todos: loadedTodos.filter((toDo) => !toDo.deleted).map((toDo) => ({ ...toDo, loadingPart: LoadingPart.NONE })),
       }))
 
-      next(null, todosRequest)
+      next(null, loadedTodos.filter((toDo) => !toDo.deleted))
     } else {
       next(todosResponse.error)
     }
@@ -269,13 +233,6 @@ function* storeNewToDo(action: Action<BodyPayload<ToDo>>) {
     },
   } = action
 
-  const lastUpdateField = getLastUpdateFieldName(toDo.boardId)
-  const db: Database = yield connectDB(getDatabaseName(user.id, toDo.boardId))
-
-  const store = db.getStore()
-  yield store.put(toDo)
-
-  localStorage.setItem(lastUpdateField, `${toDo.lastUpdate}`)
 
   yield put(addToDoAction(toDo))
 }
@@ -287,13 +244,6 @@ function* storeToDoUpdate(action: Action<BodyPayload<ToDo>>) {
       user,
     },
   } = action
-  const lastUpdateField = getLastUpdateFieldName(toDo.boardId)
-  const db: Database = yield connectDB(getDatabaseName(user.id, toDo.boardId))
-
-  const store = db.getStore()
-  yield store.put(toDo)
-
-  localStorage.setItem(lastUpdateField, `${toDo.lastUpdate}`)
 
   yield put(updateToDoAction(toDo))
 }
@@ -310,14 +260,6 @@ function* deleteStoredToDos(action: Action<DeleteStotredToDosPayload>) {
       body,
     },
   } = action
-  if (lastUpdate !== undefined) {
-    const lastUpdateField = getLastUpdateFieldName(boardId)
-    localStorage.setItem(lastUpdateField, `${lastUpdate}`)
-  }
-  const db: Database = yield connectDB(getDatabaseName(user.id, boardId))
-
-  const store = db.getStore()
-  yield Promise.all(todos.map((toDoId) => store.delete(toDoId)))
 
   yield put(deleteToDosAction(body))
 }

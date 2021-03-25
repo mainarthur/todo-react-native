@@ -10,8 +10,6 @@ import BoardsResponse from '../../api/responses/BoardsResponse'
 import DeleteBoardResponse from '../../api/responses/DeleteBoardResponse'
 import NewBoardResponse from '../../api/responses/NewBoardResponse'
 import UpdateBoardResponse from '../../api/responses/UpdateBoardResponse'
-import { connectDB, getDatabaseName } from '../../indexeddb/connect'
-import Database from '../../indexeddb/Database'
 import Board from '../../models/Board'
 import User from '../../models/User'
 import { getSocket } from '../../socket.io'
@@ -39,46 +37,14 @@ function* requestBoards(action: AsyncAction<Board[], User>) {
 
   try {
     const boardsResponse: BoardsResponse = yield api<BoardsResponse, {}>({
-      endpoint: `/board${localStorage.getItem(lastUpdateField) ? `?from=${localStorage.getItem(lastUpdateField)}` : ''}`,
+      endpoint: `/board`,
     })
 
     if (boardsResponse.status) {
       const { results: boards } = boardsResponse
-      const currentLastUpdate: number = parseInt(localStorage.getItem(lastUpdateField), 10)
-      let maxLastUpdate = 0
-      const db: Database = yield connectDB(getDatabaseName(user.id))
 
-      if (!Number.isNaN(currentLastUpdate)) {
-        maxLastUpdate = Math.max(currentLastUpdate, maxLastUpdate)
-      }
-
-      const promises: Promise<void>[] = []
-
-      for (let i = 0; i < boards.length; i += 1) {
-        const board = boards[i]
-        const { lastUpdate } = board
-
-        if (lastUpdate) {
-          maxLastUpdate = Math.max(lastUpdate, maxLastUpdate)
-        }
-
-        const store = db.getStore()
-
-        if (!board.deleted) {
-          promises.push(store.put(board))
-        } else {
-          promises.push(store.delete(board.id))
-        }
-      }
-
-      yield Promise.all(promises)
-
-      localStorage.setItem(lastUpdateField, `${maxLastUpdate}`)
-
-      const store = db.getStore()
-      const allBoards: Board[] = yield store.getAll()
-      yield put(setBoardsAction(allBoards))
-      next(null, allBoards)
+      yield put(setBoardsAction(boards))
+      next(null, boards)
     } else {
       next(boardsResponse.error)
     }
@@ -249,12 +215,6 @@ function* storeBoard(action: Action<BodyPayload<Board>>) {
     },
     type,
   } = action
-  const db: Database = yield connectDB(getDatabaseName(user.id))
-
-  const store = db.getStore()
-  yield store.put(board)
-
-  localStorage.setItem(lastUpdateField, `${board.lastUpdate}`)
 
   if (type === BoardAction.STORE_NEW_BOARD) {
     yield put(addBoardAction(board))
@@ -271,12 +231,6 @@ function* deleteStoredBoard(action: Action<BodyPayload<Board>>) {
     },
   } = action
 
-  const db: Database = yield connectDB(getDatabaseName(user.id))
-
-  const store = db.getStore()
-  yield store.delete(board.id)
-
-  localStorage.setItem(lastUpdateField, `${board.lastUpdate}`)
 
   yield put(deleteBoardAction(board))
 }
