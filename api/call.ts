@@ -3,7 +3,7 @@ import Request from './Request'
 
 import { err } from '../logging/logger'
 
-const API_URL: string = '192.168.43.235:3001' //'http://api.todolist.local'
+const API_URL: string = 'http//10.10.10.197:3001' // 'http://192.168.43.235:3001' // 'http://api.todolist.local'
 
 export default async function call<B>(opts: Request<B>): Promise<ReturnType<typeof fetch>> {
   let {

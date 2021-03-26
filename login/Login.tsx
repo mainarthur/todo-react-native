@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import { NativeSyntheticEvent, TextInputChangeEventData } from 'react-native'
+import { NativeSyntheticEvent, TextInputChangeEventData, ToastAndroid } from 'react-native'
 import { useDispatch } from 'react-redux'
 import {
   Button,
@@ -10,11 +10,13 @@ import {
   Item,
   Label,
   Text,
-  Toast,
 } from 'native-base'
+import { Link } from 'react-router-native'
+
 import ToDoAppBar from '../common/ToDoAppBar/ToDoAppBar'
 import { createAsyncAction } from '../redux/helpers'
 import { loginRequestAction } from '../redux/actions/authActions'
+import authStyles from '../common/authStyles'
 
 const Login = () => {
   const [emailValue, setEmailValue] = useState('')
@@ -44,9 +46,7 @@ const Login = () => {
         password,
       }))
     } catch (err) {
-      Toast.show({
-        text: 'Login problem',
-      })
+      ToastAndroid.show('Login problem', ToastAndroid.SHORT)
     } finally {
       setIsLoading(false)
     }
@@ -55,7 +55,7 @@ const Login = () => {
   return (
     <Container>
       <ToDoAppBar />
-      <Content contentContainerStyle={{ justifyContent: 'center', flex: 1 }}>
+      <Content contentContainerStyle={authStyles.content}>
         <Form>
           <Item floatingLabel>
             <Label>Email</Label>
@@ -66,11 +66,16 @@ const Login = () => {
             <Input value={passwordValue} onChange={onPasswordChange} disabled={disabled} />
           </Item>
         </Form>
-        <Button full rounded style={{ marginTop: 32 }} onPress={onButtonPress} disabled={disabled}>
+        <Button full rounded style={authStyles.button} onPress={onButtonPress} disabled={disabled}>
           <Text>
             Login
           </Text>
         </Button>
+        <Link to="/register">
+          <Text style={authStyles.redirectText}>
+            Register if you don&amp;t have an account yet.
+          </Text>
+        </Link>
       </Content>
     </Container>
   )
