@@ -15,6 +15,8 @@ import User from './models/User'
 import { requestUserAction, setUserAction } from './redux/actions/appActions'
 import { setAccessTokenAction, setRefreshTokenAction } from './redux/actions/tokenActions'
 import { ENDPOINT, initSocket } from './socket.io'
+import styles from './appStyles'
+import BoardPage from './boards/BoardPage'
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -44,8 +46,8 @@ const App = () => {
       (async () => {
         try {
           const loadedUser = await createAsyncAction<User>(dispatch, requestUserAction())
-          setIsLoading(false)
           dispatch(setUserAction(loadedUser))
+          setIsLoading(false)
         } catch (err) {
           console.log(err)
         }
@@ -71,7 +73,7 @@ const App = () => {
       <Container>
         <Content>
           <Body>
-            <Text>Loading</Text>
+            <Text style={styles.loadingText}>Loading</Text>
           </Body>
         </Content>
       </Container>
@@ -80,9 +82,7 @@ const App = () => {
 
   return (
     <Container>
-      <Content>
-        <Text>{JSON.stringify(user)}</Text>
-      </Content>
+      <BoardPage />
     </Container>
   )
 }
