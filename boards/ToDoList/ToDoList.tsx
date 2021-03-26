@@ -5,20 +5,14 @@ import React, {
 } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  Body,
-  Button,
   Card,
-  CardItem,
-  Input,
-  Item,
-  Text,
 } from 'native-base'
 
 import Board from '../../models/Board'
 import { RootState } from '../../redux/reducers'
 import { createAsyncAction } from '../../redux/helpers'
 import ToDoCard from '../ToDoCard'
-import { requestTodosAction, setTodosAction } from '../../redux/actions/toDoActions'
+import { requestTodosAction } from '../../redux/actions/toDoActions'
 import AddToDoCard from '../AddToDoCard'
 import ToDo from '../../models/ToDo'
 
@@ -64,13 +58,13 @@ const ToDoList = ({ board }: Props) => {
     }
   }, [user, isLoading, isBoardsLoaded, loadTodos, board])
 
-  console.log(todos)
-
   return (
     <>
-      {(todos ?? []).map((toDo) => (
-        <ToDoCard key={toDo.id} toDo={toDo} />
-      ))}
+      <Card>
+        {(todos ?? []).map((toDo) => (
+          <ToDoCard key={toDo.id} toDo={toDo} />
+        ))}
+      </Card>
       <AddToDoCard board={board} />
     </>
   )

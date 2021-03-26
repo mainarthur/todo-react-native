@@ -10,7 +10,6 @@ import {
 } from 'native-base'
 import { NativeSyntheticEvent, TextInputChangeEventData, ToastAndroid } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import styles from './styles'
 import { RootState } from '../../redux/reducers'
 import Board from '../../models/Board'
 import { createAsyncAction } from '../../redux/helpers'
@@ -41,7 +40,8 @@ const AddToDoCard = ({ board }: Props) => {
       }))
       setToDoTaskValue('')
     } catch (err) {
-      ToastAndroid.show('Name is required', ToastAndroid.LONG)
+      console.log(err)
+      ToastAndroid.show('Text is required', ToastAndroid.LONG)
     }
   }, [toDoTaskValue, dispath, user, board])
 
