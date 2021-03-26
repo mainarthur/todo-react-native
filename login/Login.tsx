@@ -53,7 +53,7 @@ const Login = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [emailValue, passwordValue, isLoading])
+  }, [emailValue, passwordValue, setIsLoading, dispatch])
 
   useEffect(() => {
     if (accessToken !== '' && refreshToken !== '') {

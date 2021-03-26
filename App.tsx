@@ -7,12 +7,14 @@ import {
   Body,
   Container, Content, Text,
 } from 'native-base'
+import { io } from 'socket.io-client'
 
 import { createAsyncAction } from './redux/helpers'
 import { RootState } from './redux/reducers'
 import User from './models/User'
 import { requestUserAction, setUserAction } from './redux/actions/appActions'
 import { setAccessTokenAction, setRefreshTokenAction } from './redux/actions/tokenActions'
+import { ENDPOINT, initSocket } from './socket.io'
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -34,7 +36,7 @@ const App = () => {
         dispatch(setRefreshTokenAction(storageRefreshToken))
       })()
     }
-  }, [accessToken, refreshToken, dispatch])
+  }, [accessToken, refreshToken, dispatch, history])
 
   useEffect(() => {
     if (!user || isLoading) {
@@ -49,7 +51,20 @@ const App = () => {
         }
       })()
     }
-  }, [user, dispatch])
+  }, [user, dispatch, isLoading])
+
+  useEffect(() => {
+    const socket = io(ENDPOINT, {
+      extraHeaders: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    initSocket(socket)
+    return () => {
+      socket.disconnect()
+    }
+  }, [accessToken])
 
   if (!user) {
     return (
