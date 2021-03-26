@@ -1,16 +1,19 @@
 import {
   Container, Content, Form, Item, Label, Input, Button, Text,
 } from 'native-base'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { NativeSyntheticEvent, TextInputChangeEventData, ToastAndroid } from 'react-native'
-import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useHistory } from 'react-router-native'
 import authStyles from '../common/authStyles'
-import ToDoAppBar from '../common/ToDoAppBar/ToDoAppBar'
 import { registerRequestAction } from '../redux/actions/authActions'
 import { createAsyncAction } from '../redux/helpers'
+import { RootState } from '../redux/reducers'
 
 const Register = () => {
+  const { accessToken, refreshToken } = useSelector((state: RootState) => state.tokens)
+  const history = useHistory()
+
   const [emailValue, setEmailValue] = useState('')
   const [nameValue, setNameValue] = useState('')
   const [passwordValue, setPasswordValue] = useState('')
@@ -51,9 +54,14 @@ const Register = () => {
     }
   }, [nameValue, emailValue, passwordValue, isLoading])
 
+  useEffect(() => {
+    if (accessToken !== '' && refreshToken !== '') {
+      history.push('/')
+    }
+  }, [accessToken, refreshToken, history])
+
   return (
     <Container>
-      <ToDoAppBar />
       <Content contentContainerStyle={authStyles.content}>
         <Form>
           <Item floatingLabel>
@@ -66,7 +74,12 @@ const Register = () => {
           </Item>
           <Item floatingLabel>
             <Label>Password</Label>
-            <Input value={passwordValue} onChange={onPasswordChange} disabled={disabled} />
+            <Input
+              secureTextEntry
+              value={passwordValue}
+              onChange={onPasswordChange}
+              disabled={disabled}
+            />
           </Item>
         </Form>
         <Button full rounded style={authStyles.button} onPress={onButtonPress} disabled={disabled}>

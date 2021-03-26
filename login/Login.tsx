@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { NativeSyntheticEvent, TextInputChangeEventData, ToastAndroid } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   Button,
   Container,
@@ -11,14 +11,17 @@ import {
   Label,
   Text,
 } from 'native-base'
-import { Link } from 'react-router-native'
+import { Link, useHistory } from 'react-router-native'
 
-import ToDoAppBar from '../common/ToDoAppBar/ToDoAppBar'
 import { createAsyncAction } from '../redux/helpers'
 import { loginRequestAction } from '../redux/actions/authActions'
 import authStyles from '../common/authStyles'
+import { RootState } from '../redux/reducers'
 
 const Login = () => {
+  const { accessToken, refreshToken } = useSelector((state: RootState) => state.tokens)
+  const history = useHistory()
+
   const [emailValue, setEmailValue] = useState('')
   const [passwordValue, setPasswordValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -52,9 +55,14 @@ const Login = () => {
     }
   }, [emailValue, passwordValue, isLoading])
 
+  useEffect(() => {
+    if (accessToken !== '' && refreshToken !== '') {
+      history.push('/')
+    }
+  }, [accessToken, refreshToken, history])
+
   return (
     <Container>
-      <ToDoAppBar />
       <Content contentContainerStyle={authStyles.content}>
         <Form>
           <Item floatingLabel>
@@ -63,7 +71,12 @@ const Login = () => {
           </Item>
           <Item floatingLabel>
             <Label>Password</Label>
-            <Input value={passwordValue} onChange={onPasswordChange} disabled={disabled} />
+            <Input
+              secureTextEntry
+              value={passwordValue}
+              onChange={onPasswordChange}
+              disabled={disabled}
+            />
           </Item>
         </Form>
         <Button full rounded style={authStyles.button} onPress={onButtonPress} disabled={disabled}>
@@ -73,7 +86,7 @@ const Login = () => {
         </Button>
         <Link to="/register">
           <Text style={authStyles.redirectText}>
-            Register if you don&amp;t have an account yet.
+            Register if you don&apos;t have an account yet.
           </Text>
         </Link>
       </Content>
