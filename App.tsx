@@ -8,6 +8,8 @@ import {
   Container, Content, Text,
 } from 'native-base'
 import { io } from 'socket.io-client'
+import { Alert } from 'react-native'
+import messaging from '@react-native-firebase/messaging'
 
 import { createAsyncAction } from './redux/helpers'
 import { RootState } from './redux/reducers'
@@ -17,6 +19,8 @@ import { setAccessTokenAction, setRefreshTokenAction } from './redux/actions/tok
 import { ENDPOINT, initSocket } from './socket.io'
 import styles from './appStyles'
 import BoardPage from './boards/BoardPage'
+import { requestUserPermission } from './firebase/messaging'
+
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -24,6 +28,18 @@ const App = () => {
   const { accessToken, refreshToken } = useSelector((state: RootState) => state.tokens)
   const dispatch = useDispatch()
   const history = useHistory()
+
+  useEffect(() => {
+    requestUserPermission()
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage))
+    })
+
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     if (accessToken === '' || refreshToken === '') {
