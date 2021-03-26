@@ -1,24 +1,24 @@
-import * as React from 'react'
-import {
-  FC,
+import React, {
   useEffect,
   useState,
   useCallback,
 } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  Card,
+  CardItem,
   Content,
-  ScrollableTab, Tab, TabHeading, Tabs, Text,
+  Text,
 } from 'native-base'
-import Icon from 'react-native-vector-icons/MaterialIcons'
 
 import Board from '../../models/Board'
 import { RootState } from '../../redux/reducers'
 import { createAsyncAction } from '../../redux/helpers'
 import { requestBoardsAction } from '../../redux/actions/boardsActions'
-import AddBoardTab from '../AddBoardTab'
+import AddBoardCard from '../AddBoardCard'
+import ToDoList from '../ToDoList'
 
-const BoardPage: FC = () => {
+const BoardPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isBoardsLoaded, setIsBoardsLoaded] = useState(false)
   const [isLoadError, setIsLoadError] = useState(false)
@@ -27,8 +27,6 @@ const BoardPage: FC = () => {
   const { user } = useSelector((state: RootState) => state.app)
 
   const dispatch = useDispatch()
-
-  const renderTabBar = useCallback(() => <ScrollableTab />, [])
 
   const loadBoards = useCallback(async () => {
     try {
@@ -56,23 +54,22 @@ const BoardPage: FC = () => {
   }, [user, isLoading, isBoardsLoaded, loadBoards])
 
   const tabs = (boards ?? []).map((board) => (
-    <Tab heading={board.name} key={board.id}>
-      <Content padder>
-        <Text>{JSON.stringify(board)}</Text>
-      </Content>
-    </Tab>
+    <Card key={board.id}>
+      <CardItem header bordered>
+        <Text>{board.name}</Text>
+      </CardItem>
+      <ToDoList board={board} />
+    </Card>
   ))
 
   tabs.push(
-    <Tab heading={<TabHeading><Icon name="add" color="#fff" size={16} /></TabHeading>}>
-      <AddBoardTab />
-    </Tab>,
+    <Card key="add-board-tab">
+      <AddBoardCard />
+    </Card>,
   )
 
   return (
-    <Tabs renderTabBar={renderTabBar}>
-      {tabs}
-    </Tabs>
+    <Content>{tabs}</Content>
   )
 }
 

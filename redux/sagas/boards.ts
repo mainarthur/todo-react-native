@@ -27,23 +27,20 @@ import Action from '../types/Action'
 import AsyncAction from '../types/AsyncAction'
 import BodyPayload from '../types/payloads/BodyPayload'
 
-const lastUpdateField = 'lastUpdate-boards'
-
 function* requestBoards(action: AsyncAction<Board[], User>) {
   const {
     next,
-    payload: user,
   } = action
 
   try {
     const boardsResponse: BoardsResponse = yield api<BoardsResponse, {}>({
-      endpoint: `/board`,
+      endpoint: '/board',
     })
 
     if (boardsResponse.status) {
       const { results: boards } = boardsResponse
 
-      yield put(setBoardsAction(boards))
+      yield put(setBoardsAction(boards.filter((board) => !board.deleted)))
       next(null, boards)
     } else {
       next(boardsResponse.error)
@@ -80,7 +77,7 @@ function* requestNewBoard(action: AsyncAction<Board, BodyPayload<NewBoardBody>>)
       const socket = getSocket()
 
       if (socket) {
-        socket.emit('join-board', board.id)
+        socket.emit('new-board', board)
       }
 
       next(null, board)
@@ -211,7 +208,6 @@ function* storeBoard(action: Action<BodyPayload<Board>>) {
   const {
     payload: {
       body: board,
-      user,
     },
     type,
   } = action
@@ -227,10 +223,8 @@ function* deleteStoredBoard(action: Action<BodyPayload<Board>>) {
   const {
     payload: {
       body: board,
-      user,
     },
   } = action
-
 
   yield put(deleteBoardAction(board))
 }
