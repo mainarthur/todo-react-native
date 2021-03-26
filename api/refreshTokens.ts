@@ -34,6 +34,7 @@ export const refreshTokens = async (): Promise<boolean> => {
       return true
     }
   } catch (e) {
+    console.error(e)
     err(e)
   }
 
