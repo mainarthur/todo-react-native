@@ -8,8 +8,6 @@ import {
   Container, Content, Text,
 } from 'native-base'
 import { io } from 'socket.io-client'
-import { Alert } from 'react-native'
-import messaging from '@react-native-firebase/messaging'
 
 import { createAsyncAction } from './redux/helpers'
 import { RootState } from './redux/reducers'
@@ -21,7 +19,6 @@ import styles from './appStyles'
 import BoardPage from './boards/BoardPage'
 import { requestUserPermission } from './firebase/messaging'
 
-
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
   const { user } = useSelector((state: RootState) => state.app)
@@ -31,14 +28,6 @@ const App = () => {
 
   useEffect(() => {
     requestUserPermission()
-  }, [])
-
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage))
-    })
-
-    return unsubscribe
   }, [])
 
   useEffect(() => {
@@ -62,8 +51,8 @@ const App = () => {
       (async () => {
         try {
           const loadedUser = await createAsyncAction<User>(dispatch, requestUserAction())
-          dispatch(setUserAction(loadedUser))
           setIsLoading(false)
+          dispatch(setUserAction(loadedUser))
         } catch (err) {
           console.log(err)
         }

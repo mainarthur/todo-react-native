@@ -31,8 +31,6 @@ import BodyPayload from '../types/payloads/BodyPayload'
 import { getSocket } from '../../socket.io'
 import Action from '../types/Action'
 
-const getLastUpdateFieldName = (boardId: string) => `lastUpdate-todos-${boardId}`
-
 function* requestTodos(action: AsyncAction<ToDo[], BoardPayload>) {
   const {
     payload: {
@@ -46,8 +44,6 @@ function* requestTodos(action: AsyncAction<ToDo[], BoardPayload>) {
     return next(new Error('User not found'))
   }
 
-  const lastUpdateField = getLastUpdateFieldName(boardId)
-
   const todosResponse: ToDoListResponse = yield api<ToDoListResponse, {}>({
     endpoint: `/todo?boardId=${boardId}`,
   })
@@ -58,7 +54,11 @@ function* requestTodos(action: AsyncAction<ToDo[], BoardPayload>) {
 
       yield put(setTodosAction({
         boardId,
-        todos: loadedTodos.filter((toDo) => !toDo.deleted).map((toDo) => ({ ...toDo, loadingPart: LoadingPart.NONE })),
+        todos: loadedTodos.filter(
+          (toDo) => !toDo.deleted,
+        ).map(
+          (toDo) => ({ ...toDo, loadingPart: LoadingPart.NONE }),
+        ),
       }))
 
       next(null, loadedTodos.filter((toDo) => !toDo.deleted))
@@ -229,10 +229,8 @@ function* storeNewToDo(action: Action<BodyPayload<ToDo>>) {
   const {
     payload: {
       body: toDo,
-      user,
     },
   } = action
-
 
   yield put(addToDoAction(toDo))
 }
@@ -241,7 +239,6 @@ function* storeToDoUpdate(action: Action<BodyPayload<ToDo>>) {
   const {
     payload: {
       body: toDo,
-      user,
     },
   } = action
 
@@ -251,12 +248,6 @@ function* storeToDoUpdate(action: Action<BodyPayload<ToDo>>) {
 function* deleteStoredToDos(action: Action<DeleteStotredToDosPayload>) {
   const {
     payload: {
-      body: {
-        todos,
-        boardId,
-        lastUpdate,
-      },
-      user,
       body,
     },
   } = action
